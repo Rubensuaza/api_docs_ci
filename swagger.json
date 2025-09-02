@@ -1,0 +1,619 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Inhibitory Control API",
+    "version": "1.0.0",
+    "description": "API for the Inhibitory Control system",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3005",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Check server status",
+        "description": "Endpoint to verify that the server is working correctly",
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "200": {
+            "description": "Server working correctly",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Server is running"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/level/data": {
+      "get": {
+        "summary": "Get data for a specific level",
+        "description": "Returns levelId, totalStimuliNumber and stimuliToPassNumber data for a specific level and task.",
+        "tags": [
+          "Levels"
+        ],
+        "parameters": [
+          {
+            "name": "level",
+            "in": "query",
+            "required": true,
+            "description": "Level number (for example 1, 2, 3, etc.)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "taskName",
+            "in": "query",
+            "required": true,
+            "description": "Exact task name (for example 'Stellar Castaways')",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Level data successfully obtained",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "levelId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "stimuliToPassNumber": {
+                          "type": "integer",
+                          "example": 8
+                        },
+                        "totalStimuliNumber": {
+                          "type": "integer",
+                          "example": 10
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Level data successfully obtained"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "The level number must be a valid numeric value"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Level or task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "No data found for level 1 of the task \"Stellar Castaways\""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Error getting level data: Internal error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance-tables": {
+      "post": {
+        "summary": "Create a new performance table",
+        "description": "Creates a new performance table with the provided data",
+        "tags": [
+          "PerformanceTables"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "session",
+                  "level"
+                ],
+                "properties": {
+                  "session": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The session ID"
+                  },
+                  "level": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The level ID"
+                  },
+                  "correctAnswers": {
+                    "type": "integer",
+                    "description": "Number of correct answers",
+                    "default": 0
+                  },
+                  "errors": {
+                    "type": "integer",
+                    "description": "Number of errors",
+                    "default": 0
+                  },
+                  "brainsObtained": {
+                    "type": "integer",
+                    "description": "Number of brains obtained",
+                    "default": 0
+                  },
+                  "passed": {
+                    "type": "boolean",
+                    "description": "Whether the performance was approved",
+                    "default": false
+                  },
+                  "reactionTime": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Reaction time",
+                    "default": 0
+                  },
+                  "playedTime": {
+                    "type": "string",
+                    "description": "Time played (interval)",
+                    "default": "00:00:00"
+                  },
+                  "startTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Start time"
+                  },
+                  "endTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "End time"
+                  },
+                  "studentDocumentNumber": {
+                    "type": "string",
+                    "description": "Student document number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Performance table created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "session": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "level": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "correctAnswers": {
+                          "type": "integer"
+                        },
+                        "errors": {
+                          "type": "integer"
+                        },
+                        "brainsObtained": {
+                          "type": "integer"
+                        },
+                        "passed": {
+                          "type": "boolean"
+                        },
+                        "reactionTime": {
+                          "type": "number",
+                          "format": "double"
+                        },
+                        "playedTime": {
+                          "type": "string"
+                        },
+                        "startTime": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "endTime": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "studentDocumentNumber": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Performance table created successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "session and level are required"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training-sessions/{id}": {
+      "get": {
+        "summary": "Get a training session by ID",
+        "description": "Returns a training session if the provided ID is valid.",
+        "tags": [
+          "Training Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Training session ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Training session found successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "description": "Training session data"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Training session found successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Training session not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training-sessions/update-results": {
+      "put": {
+        "summary": "Update training session results",
+        "description": "Updates the results of a training session by calling the stored procedure cc.actualizar_resultados_sesion",
+        "tags": [
+          "Training Sessions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "studentDocumentNumber",
+                  "sessionId"
+                ],
+                "properties": {
+                  "studentDocumentNumber": {
+                    "type": "string",
+                    "description": "Student document number"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "Training session ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session results successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Session results successfully updated"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Training session not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/training-sessions/progress/{studentDocumentNumber}": {
+      "get": {
+        "summary": "Get student progress",
+        "description": "Returns the progress data for a specific student by their document number.",
+        "tags": [
+          "Training Sessions"
+        ],
+        "parameters": [
+          {
+            "name": "studentDocumentNumber",
+            "in": "path",
+            "required": true,
+            "description": "Student document number",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student progress retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "Student progress data"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Progress student found successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No progress found for this student",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "No progress found for this student"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "tags": []
+}
